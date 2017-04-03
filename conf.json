@@ -1,0 +1,36 @@
+{
+    "APIKey": "",
+    "InstanceId": "",
+    "ContactAction": "Create",
+    "AttachCustomerPortal": true,
+    "UpdateContactStatus": false,
+    "SQLConf": {
+        "Driver": "csv",
+        "Server": "localhost",
+        "Database": "CSV64",
+        "UserName": "root",
+        "Password": "",
+        "Port": 5002,
+        "ContactID": "FIELD1",
+        "Encrypt": false,
+        "Query": "SELECT * FROM adbc.csv"
+    },
+    "ContactMapping":{
+        "logon_id":"{{.FIELD1}}",
+        "firstname":"{{.FIELD2}}",
+        "lastname":"{{.FIELD3}}",
+        "company":"{{.FIELD1}}",
+        "email_1":"{{.FIELD2}}",
+        "email_2":"",
+        "tel_1":"{{.telext}}",
+        "tel_2":"",
+        "jobtitle":"",
+        "description":"",
+        "notes":"",
+        "country":"",
+        "language":"",
+        "private":"0",
+        "rights":"0",
+        "contact_status":"0"
+    }
+}
