@@ -3,100 +3,98 @@ package main
 
 //----- Packages -----
 import (
-
+	"bytes"
 	"encoding/json"
-    "encoding/xml"
-    "text/template"
-    "bytes"
+	"encoding/xml"
 	"errors"
 	"flag"
 	"fmt"
-	"os"
-	"log"
 	"html"
-    
+	"log"
+	"os"
+	"text/template"
+
+	"crypto/rand"
+	"github.com/hornbill/color" //-- CLI Colour
+	"github.com/hornbill/goApiLib"
+	"github.com/hornbill/pb" //--Hornbil Clone of "github.com/cheggaaa/pb"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-	"crypto/rand"
-    "github.com/hornbill/color" //-- CLI Colour
-	"github.com/hornbill/goApiLib"
-    "github.com/hornbill/pb"      //--Hornbil Clone of "github.com/cheggaaa/pb"
 	//SQL Package
 	"github.com/hornbill/sqlx"
 	//SQL Drivers
-    "github.com/alexbrainman/odbc"
-	"github.com/hornbill/go-mssqldb"
-	"github.com/hornbill/mysql"
-	"github.com/jnewmano/mysql320" //MySQL v3.2.0 to v5 driver - Provides SWSQL (MySQL 4.0.16) support
-
+	_ "github.com/alexbrainman/odbc"
+	_ "github.com/hornbill/go-mssqldb"
+	_ "github.com/hornbill/mysql"
+	_ "github.com/jnewmano/mysql320" //MySQL v3.2.0 to v5 driver - Provides SWSQL (MySQL 4.0.16) support
 )
 
 //----- Constants -----
 const (
-    letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    version = "1.0.0"
-    constOK = "ok"
-    updateString = "Update"
-    createString = "Create"
+	letterBytes  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	version      = "1.0.1"
+	constOK      = "ok"
+	updateString = "Update"
+	createString = "Create"
 )
 
 var (
-	SQLImportConf SQLImportConfStruct
+	SQLImportConf       SQLImportConfStruct
 	xmlmcInstanceConfig xmlmcConfig
-	xmlmcUsers []userListItemStruct
-	sites []siteListStruct
-	counters counterTypeStruct
-	configFileName string
-	configZone string
-	configLogPrefix string
-	configDryRun bool
-	configVersion bool
-	configWorkers int
-	configMaxRoutines string
-    BaseSQLQuery        string
-	timeNow string
-	startTime time.Time
-	endTime time.Duration
-	errorCount uint64
-	noValuesToUpdate = "There are no values to update"
+	xmlmcUsers          []userListItemStruct
+	sites               []siteListStruct
+	counters            counterTypeStruct
+	configFileName      string
+	configZone          string
+	configLogPrefix     string
+	configDryRun        bool
+	configVersion       bool
+	configWorkers       int
+	configMaxRoutines   string
+	BaseSQLQuery        string
+	timeNow             string
+	startTime           time.Time
+	endTime             time.Duration
+	errorCount          uint64
+	noValuesToUpdate    = "There are no values to update"
 	mutex               = &sync.Mutex{}
 	mutexBar            = &sync.Mutex{}
 	mutexCounters       = &sync.Mutex{}
 	mutexCustomers      = &sync.Mutex{}
 	mutexSite           = &sync.Mutex{}
-    mutexSites = &sync.Mutex{}
-    mutexGroups = &sync.Mutex{}
-    mutexManagers = &sync.Mutex{}
-    logFileMutex = &sync.Mutex{}
-    bufferMutex = &sync.Mutex{}
+	mutexSites          = &sync.Mutex{}
+	mutexGroups         = &sync.Mutex{}
+	mutexManagers       = &sync.Mutex{}
+	logFileMutex        = &sync.Mutex{}
+	bufferMutex         = &sync.Mutex{}
 	worker              sync.WaitGroup
 	maxGoroutines       = 6
-    
-ContactArray = []string{
-    "logon_id",
-	"firstname",
-	"lastname",
-	"company",
-	"email_1",
-	"email_2",
-	"tel_1",
-	"tel_2",
-	"jobtitle",
-	"description",
-	"notes",
-	"country",
-	"language",
-	"private",
-	"rights",
-	"contact_status"}
+
+	ContactArray = []string{
+		"logon_id",
+		"firstname",
+		"lastname",
+		"company",
+		"email_1",
+		"email_2",
+		"tel_1",
+		"tel_2",
+		"jobtitle",
+		"description",
+		"notes",
+		"country",
+		"language",
+		"private",
+		"rights",
+		"contact_status"}
 )
 
 type siteListStruct struct {
-	OrgName string
-	OrgID   int
-    CompanyID string
+	OrgName   string
+	OrgID     int
+	CompanyID string
 }
 type xmlmcSiteListResponse struct {
 	MethodResult string               `xml:"status,attr"`
@@ -110,8 +108,8 @@ type paramsSiteRowDataListStruct struct {
 	Row siteObjectStruct `xml:"row"`
 }
 type siteObjectStruct struct {
-	OrganizationId      int    `xml:"h_organization_id"`
-	OrganizationName    string `xml:"h_organization_name"`
+	OrganizationId   int    `xml:"h_organization_id"`
+	OrganizationName string `xml:"h_organization_name"`
 	/* SiteCountry string `xml:"h_country"` */
 }
 type xmlmcConfig struct {
@@ -129,34 +127,34 @@ type counterTypeStruct struct {
 	profileSkipped uint16
 }
 type contactMappingStruct struct {
-	login_id         string
+	login_id       string
 	firstname      string
 	lastname       string
-	company       string
-	email_1       string
-	email_2       string
-	tel_1       string
+	company        string
+	email_1        string
+	email_2        string
+	tel_1          string
 	tel_2          string
-	jobtitle          string
-	description         string
-	notes       string
-	country    string
-	language    string
-	private    string
-	rights    string
-	contact_status    string
+	jobtitle       string
+	description    string
+	notes          string
+	country        string
+	language       string
+	private        string
+	rights         string
+	contact_status string
 }
 
 type SQLImportConfStruct struct {
-	APIKey                   string
-	InstanceID               string
-	URL                      string
-	ContactAction           string
-    AttachCustomerPortal     bool
-    UpdateContactStatus     bool
-	SQLConf                  sqlConfStruct
-	ContactMapping        map[string]string 
-	SQLAttributes     []string
+	APIKey               string
+	InstanceID           string
+	URL                  string
+	ContactAction        string
+	AttachCustomerPortal bool
+	UpdateContactStatus  bool
+	SQLConf              sqlConfStruct
+	ContactMapping       map[string]string
+	SQLAttributes        []string
 }
 type xmlmcResponse struct {
 	MethodResult string       `xml:"status,attr"`
@@ -164,9 +162,9 @@ type xmlmcResponse struct {
 	State        stateStruct  `xml:"state"`
 }
 type xmlmcCheckUserResponse struct {
-	MethodResult string                 `xml:"status,attr"`
+	MethodResult string                     `xml:"status,attr"`
 	Params       paramsUserSearchListStruct `xml:"params"`
-	State        stateStruct            `xml:"state"`
+	State        stateStruct                `xml:"state"`
 }
 
 type paramsUserSearchListStruct struct {
@@ -176,7 +174,7 @@ type paramsUserRowDataListStruct struct {
 	Row userObjectStruct `xml:"row"`
 }
 type userObjectStruct struct {
-	PKID   string `xml:"h_pk_id"`
+	PKID string `xml:"h_pk_id"`
 }
 
 type stateStruct struct {
@@ -194,18 +192,18 @@ type paramsUserListStruct struct {
 }
 type userListItemStruct struct {
 	ContactID string `xml:"contactId"`
-	Name   string `xml:"name"`
+	Name      string `xml:"name"`
 }
 type sqlConfStruct struct {
-	Driver   string
-	Server   string
-	UserName string
-	Password string
-	Port     int
-	Query    string
-	Database string
-	Encrypt  bool
-	ContactID  string
+	Driver    string
+	Server    string
+	UserName  string
+	Password  string
+	Port      int
+	Query     string
+	Database  string
+	Encrypt   bool
+	ContactID string
 }
 
 type xmlmcuserSetGroupOptionsResponse struct {
@@ -213,9 +211,9 @@ type xmlmcuserSetGroupOptionsResponse struct {
 	State        stateStruct `xml:"state"`
 }
 type xmlmcprofileSetImageResponse struct {
-	MethodResult string      `xml:"status,attr"`
+	MethodResult string                `xml:"status,attr"`
 	Params       paramsGroupListStruct `xml:"params"`
-	State        stateStruct `xml:"state"`
+	State        stateStruct           `xml:"state"`
 }
 type xmlmcGroupListResponse struct {
 	MethodResult string                `xml:"status,attr"`
@@ -236,12 +234,10 @@ type groupObjectStruct struct {
 	GroupName string `xml:"h_name"`
 }
 
-
-
 type xmlmcPrimEntResponse struct {
-	MethodResult string                `xml:"status,attr"`
+	MethodResult string              `xml:"status,attr"`
 	Params       paramsPrimEntStruct `xml:"params"`
-	State        stateStruct           `xml:"state"`
+	State        stateStruct         `xml:"state"`
 }
 
 type paramsPrimEntStruct struct {
@@ -253,10 +249,8 @@ type paramsPrimEntRowStruct struct {
 }
 
 type primEntObjectStruct struct {
-	PkID   string `xml:"h_pk_id"`
+	PkID string `xml:"h_pk_id"`
 }
-
-
 
 func initVars() {
 	//-- Start Time for Durration
@@ -311,23 +305,23 @@ func main() {
 		logger(4, "Unable to Connect to Instance", true)
 		return
 	}
-    
+
 	//Set SWSQLDriver to mysql320
 	if SQLImportConf.SQLConf.Driver == "swsql" {
 		SQLImportConf.SQLConf.Driver = "mysql320"
 	}
 
 	//Get asset types, process accordingly
-//	BaseSQLQuery = SQLImportConf.SQLConf.Query
- //   fmt.Println(buildConnectionString())
-    var boolSQLUsers, arrUsers = queryDatabase()
-    if boolSQLUsers {
-        processUsers(arrUsers)
-    } else {
+	//	BaseSQLQuery = SQLImportConf.SQLConf.Query
+	//   fmt.Println(buildConnectionString())
+	var boolSQLUsers, arrUsers = queryDatabase()
+	if boolSQLUsers {
+		processUsers(arrUsers)
+	} else {
 		logger(4, "No Results found", true)
 		return
-    }
-    
+	}
+
 	outputEnd()
 }
 
@@ -371,8 +365,8 @@ func procFlags() {
 	if !configVersion {
 		outputFlags()
 	}
-    
-    //Check maxGoroutines for valid value
+
+	//Check maxGoroutines for valid value
 	maxRoutines, err := strconv.Atoi(configMaxRoutines)
 	if err != nil {
 		color.Red("Unable to convert maximum concurrency of [" + configMaxRoutines + "] to type INT for processing")
@@ -397,7 +391,6 @@ func outputFlags() {
 	logger(1, "Flag - Dry Run "+fmt.Sprintf("%v", configDryRun), true)
 	logger(1, "Flag - Workers "+fmt.Sprintf("%v", configWorkers), false)
 }
-
 
 //-- Check Latest
 //-- Function to Load Configruation File
@@ -608,8 +601,8 @@ func getInstanceURL() string {
 
 //buildConnectionString -- Build the connection string for the SQL driver
 func buildConnectionString() string {
-//	if SQLImportConf.SQLConf.Server == "" || SQLImportConf.SQLConf.Database == "" || SQLImportConf.SQLConf.UserName == "" || SQLImportConf.SQLConf.Password == "" {
-	if SQLImportConf.SQLConf.Server == "" || SQLImportConf.SQLConf.Database == "" || SQLImportConf.SQLConf.UserName == ""  {
+	//	if SQLImportConf.SQLConf.Server == "" || SQLImportConf.SQLConf.Database == "" || SQLImportConf.SQLConf.UserName == "" || SQLImportConf.SQLConf.Password == "" {
+	if SQLImportConf.SQLConf.Server == "" || SQLImportConf.SQLConf.Database == "" || SQLImportConf.SQLConf.UserName == "" {
 		//Conf not set - log error and return empty string
 		logger(4, "Database configuration not set.", true)
 		return ""
@@ -650,18 +643,17 @@ func buildConnectionString() string {
 		}
 		connectString = "tcp:" + SQLImportConf.SQLConf.Server + ":" + dbPortSetting
 		connectString = connectString + "*" + SQLImportConf.SQLConf.Database + "/" + SQLImportConf.SQLConf.UserName + "/" + SQLImportConf.SQLConf.Password
-    case "csv":
-        //connectString = "driver=Microsoft.Jet.OLEDB.4.0; Data Source=C:\\SPF\\Go\\work\\csvtest;Extended Properties=\"text;HDR=Yes;FMT=Delimited\""
-        connectString = "Driver={Microsoft Text Driver (*.txt; *.csv)};DefaultDir=C:\\SPF\\Go\\work\\csvtest;Extensions=CSV;Extended Properties=\"text;HDR=Yes;FMT=Delimited\""
-        connectString = "DSN=" + SQLImportConf.SQLConf.Database + ";Extended Properties='text;HDR=Yes;FMT=Delimited'"
-        SQLImportConf.SQLConf.Driver = "odbc"
-    case "excel":
-        connectString = "DSN=" + SQLImportConf.SQLConf.Database + ";Extended Properties='text;HDR=Yes;FMT=Delimited'"
-        SQLImportConf.SQLConf.Driver = "odbc"
+	case "csv":
+		//connectString = "driver=Microsoft.Jet.OLEDB.4.0; Data Source=C:\\SPF\\Go\\work\\csvtest;Extended Properties=\"text;HDR=Yes;FMT=Delimited\""
+		connectString = "Driver={Microsoft Text Driver (*.txt; *.csv)};DefaultDir=C:\\SPF\\Go\\work\\csvtest;Extensions=CSV;Extended Properties=\"text;HDR=Yes;FMT=Delimited\""
+		connectString = "DSN=" + SQLImportConf.SQLConf.Database + ";Extended Properties='text;HDR=Yes;FMT=Delimited'"
+		SQLImportConf.SQLConf.Driver = "odbc"
+	case "excel":
+		connectString = "DSN=" + SQLImportConf.SQLConf.Database + ";Extended Properties='text;HDR=Yes;FMT=Delimited'"
+		SQLImportConf.SQLConf.Driver = "odbc"
 	}
 	return connectString
 }
-
 
 //queryDatabase -- Query Asset Database for assets of current type
 //-- Builds map of assets, returns true if successful
@@ -707,10 +699,9 @@ func queryDatabase() (bool, []map[string]interface{}) {
 		ArrUserMaps = append(ArrUserMaps, results)
 	}
 	defer rows.Close()
-	logger(3, fmt.Sprintf("[DATABASE] Found %d results",intUserCount), false)
+	logger(3, fmt.Sprintf("[DATABASE] Found %d results", intUserCount), false)
 	return true, ArrUserMaps
 }
-
 
 //processAssets -- Processes Assets from Asset Map
 //--If asset already exists on the instance, update
@@ -731,108 +722,114 @@ func processUsers(arrUsers []map[string]interface{}) {
 		//Get the asset ID for the current record
 		contactID := fmt.Sprintf("%s", userMap[contactIDField])
 		logger(1, "User ID: "+contactID, false)
-        if contactID != "" {
-            //logger(1, "User ID: "+fmt.Sprintf("%s", contactID), false)
-            espXmlmc := apiLib.NewXmlmcInstance(SQLImportConf.URL)
-            espXmlmc.SetAPIKey(SQLImportConf.APIKey)
-            go func() {
-                defer worker.Done()
-                time.Sleep(1 * time.Millisecond)
-                mutexBar.Lock()
-                bar.Increment()
-                mutexBar.Unlock()
+		if contactID != "" {
+			//logger(1, "User ID: "+fmt.Sprintf("%s", contactID), false)
+			espXmlmc := apiLib.NewXmlmcInstance(SQLImportConf.URL)
+			espXmlmc.SetAPIKey(SQLImportConf.APIKey)
+			go func() {
+				defer worker.Done()
+				time.Sleep(1 * time.Millisecond)
+				mutexBar.Lock()
+				bar.Increment()
+				mutexBar.Unlock()
 
-                var isErr = false
-                foundId, err := checkUserOnInstance(contactID, espXmlmc)
-                if err != nil {
-                    logger(4, "Unable to Search For User: "+fmt.Sprintf("%v", err), false)
-                    isErr = true
-                }
-                //logger(4, "Found Contact: "+fmt.Sprintf("%d", foundId), true)
-                //-- Update or Create Asset
-                if !isErr {
-                    if foundId > 0 && SQLImportConf.ContactAction != createString {
-                        logger(1, fmt.Sprintf("Update Customer: %s (%d)", contactID , foundId), false)
-                        _, errUpdate := updateUser(userMap, espXmlmc, foundId)
-                        if errUpdate != nil {
-                            logger(4, "Unable to Update User: "+fmt.Sprintf("%v", errUpdate), false)
-                        }
-                    } else if foundId < 0 && SQLImportConf.ContactAction != updateString {
-                        logger(1, "Create Customer: "+contactID, false)
-                        _, errorCreate := updateUser(userMap, espXmlmc, foundId)
-                        if errorCreate != nil {
-                            logger(4, "Unable to Create User: "+fmt.Sprintf("%v", errorCreate), false)
-                        }
-                    }
-                }
-                <-maxGoroutinesGuard
-            }()
-        }
+				var isErr = false
+				foundId, err := checkUserOnInstance(contactID, espXmlmc)
+				if err != nil {
+					logger(4, "Unable to Search For User: "+fmt.Sprintf("%v", err), false)
+					isErr = true
+				}
+				//logger(4, "Found Contact: "+fmt.Sprintf("%d", foundId), true)
+				//-- Update or Create Asset
+				if !isErr {
+					if foundId > 0 && SQLImportConf.ContactAction != createString {
+						logger(1, fmt.Sprintf("Update Customer: %s (%d)", contactID, foundId), false)
+						_, errUpdate := updateUser(userMap, espXmlmc, foundId)
+						if errUpdate != nil {
+							logger(4, "Unable to Update User: "+fmt.Sprintf("%v", errUpdate), false)
+						}
+					} else if foundId < 0 && SQLImportConf.ContactAction != updateString {
+						logger(1, "Create Customer: "+contactID, false)
+						_, errorCreate := updateUser(userMap, espXmlmc, foundId)
+						if errorCreate != nil {
+							logger(4, "Unable to Create User: "+fmt.Sprintf("%v", errorCreate), false)
+						}
+					}
+				}
+				<-maxGoroutinesGuard
+			}()
+		}
 	}
 	worker.Wait()
 	bar.FinishPrint("Processing Complete!")
 }
 
-
 func updateUser(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, foundId int) (bool, error) {
-    buf2 := bytes.NewBufferString("");
-    searchResultSiteID := ""
-    searchResultCompID := ""
+	buf2 := bytes.NewBufferString("")
+	searchResultSiteID := ""
+	//searchResultCompID := ""
 	//-- Do we Lookup Site
-    var p map[string]string
-    p = make(map[string]string)
-    //fmt.Println("%v", u)
-    for key, value := range u {
-        p[key] = fmt.Sprintf("%s", value)
-    }
-//    contactID := p[SQLImportConf.SQLConf.ContactID]
-    espXmlmc.SetParam("entity", "Contact")
+	var p map[string]string
+	p = make(map[string]string)
+	//fmt.Println("%v", u)
+	for key, value := range u {
+		p[key] = fmt.Sprintf("%s", value)
+	}
+	//    contactID := p[SQLImportConf.SQLConf.ContactID]
+	espXmlmc.SetParam("entity", "Contact")
+	espXmlmc.SetParam("returnModifiedData", "true")
+	espXmlmc.SetParam("returnRawValues", "true")
 
 	espXmlmc.OpenElement("primaryEntityData")
 	espXmlmc.OpenElement("record")
 
-    if foundId > 0 {
-        espXmlmc.SetParam("h_pk_id", fmt.Sprintf("%d", foundId))
-    }
-    
+	if foundId > 0 {
+		espXmlmc.SetParam("h_pk_id", fmt.Sprintf("%d", foundId))
+	}
+
 	//-- Loop Through UserProfileMapping
 	for key := range ContactArray {
 		field := ContactArray[key]
-		value := SQLImportConf.ContactMapping[field] 
-      //  fmt.Println(abc)
-      t := template.New(field)
-      t, _ = t.Parse(value)
-      buf := bytes.NewBufferString("");
-      t.Execute(buf, p)
+		value := SQLImportConf.ContactMapping[field]
+		//  fmt.Println(abc)
+		t := template.New(field)
+		t, _ = t.Parse(value)
+		buf := bytes.NewBufferString("")
+		t.Execute(buf, p)
 		value = buf.String()
-        if (value == "%!s(<nil>)") { value = "" }
+		if value == "%!s(<nil>)" {
+			value = ""
+		}
 
 		if field == "contact_status" && foundId > 0 && !SQLImportConf.UpdateContactStatus {
-        } else if field == "company" && value != "" {
-            espXmlmc.SetParam("h_" + field, value)
-            //search IF result:
-            searchResultSiteID, searchResultCompID = getSiteFromLookup(value, buf2)
-            if searchResultSiteID != "" {
-                espXmlmc.SetParam("h_organization_id", searchResultSiteID)
-            }
+		} else if field == "company" && value != "" {
+			espXmlmc.SetParam("h_"+field, value)
+			//search IF result:
+			//searchResultSiteID, searchResultCompID = getSiteFromLookup(value, buf2)
+			searchResultSiteID, _ = getSiteFromLookup(value, buf2)
+			if searchResultSiteID != "" {
+				espXmlmc.SetParam("h_organization_id", searchResultSiteID)
+			}
 		} else if value != "" {
-			espXmlmc.SetParam("h_" + field, value)
+			espXmlmc.SetParam("h_"+field, value)
 		}
 	}
 
 	espXmlmc.CloseElement("record")
 	espXmlmc.CloseElement("primaryEntityData")
-//logger(4, espXmlmc.GetParam(), true)
+	var XMLSTRING = espXmlmc.GetParam()
+	logger(1, "User Create/Update XML "+fmt.Sprintf("%s", XMLSTRING), false)
 	//-- Check for Dry Run
 	if configDryRun != true {
-        var XMLCreate string
-        var xmlmcErr error
-        if foundId > 0 {
-            XMLCreate, xmlmcErr = espXmlmc.Invoke("data", "entityUpdateRecord")
-        } else {
-            XMLCreate, xmlmcErr = espXmlmc.Invoke("data", "entityAddRecord")
-        }
-        
+		var XMLCreate string
+		var xmlmcErr error
+
+		if foundId > 0 {
+			XMLCreate, xmlmcErr = espXmlmc.Invoke("data", "entityUpdateRecord")
+		} else {
+			XMLCreate, xmlmcErr = espXmlmc.Invoke("data", "entityAddRecord")
+		}
+
 		var xmlRespon xmlmcPrimEntResponse //xmlmcResponse
 		if xmlmcErr != nil {
 			errorCountInc()
@@ -849,117 +846,146 @@ func updateUser(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, foun
 			return false, err
 
 		}
-        if foundId < 0 {
-            foundId, err = strconv.Atoi(xmlRespon.Params.RowData.Row.PkID)
-        }
-        var XMLSTRING = espXmlmc.GetParam()
-        logger(1, "User Create/Update XML "+fmt.Sprintf("%s", XMLSTRING), false)
+		if foundId < 0 {
+			foundId, err = strconv.Atoi(xmlRespon.Params.RowData.Row.PkID)
+		}
+		//fmt.Println(xmlRespon.Params.RowData.Row.PkID + " --- " + strconv.Itoa(foundId) + " ::: " + searchResultSiteID)
+		//fmt.Sprintln("%v",xmlRespon.Params.RowData.Row)
+		//        if (searchResultCompID != "" && foundId > 0){
+		if searchResultSiteID != "" && foundId > 0 {
+			logger(1, "Org Relation", false)
+			var xmlRelationResp xmlmcResponse
+			espXmlmc.ClearParam()
+			espXmlmc.SetParam("entity", "RelatedContainer")
+			//espXmlmc.SetParam("returnModifiedData", false)
+			espXmlmc.OpenElement("primaryEntityData")
+			espXmlmc.OpenElement("record")
+			espXmlmc.SetParam("h_container", searchResultSiteID)
+			espXmlmc.SetParam("h_element", strconv.Itoa(foundId))
+			espXmlmc.SetParam("h_element_type", "Contact")
+			espXmlmc.SetParam("h_rel_type", "member")
+			espXmlmc.CloseElement("record")
+			espXmlmc.CloseElement("primaryEntityData")
+			//            logger(1, "Org Rel XML1 "+fmt.Sprintf("%s", espXmlmc.GetParam()), false)
+			XMLCreate, xmlmcErr = espXmlmc.Invoke("data", "entityAddRecord")
+			if xmlmcErr != nil {
+				errorCountInc()
+				return false, xmlmcErr
+			}
+			err := xml.Unmarshal([]byte(XMLCreate), &xmlRelationResp)
+			if err != nil {
+				errorCountInc()
+				return false, err
+			}
+			//logger(1, xmlRelationResp.State.ErrorRet, false)
+			/* Fire and forget
+			   if xmlRelationResp.MethodResult != constOK {
+			       err = errors.New(xmlRelationResp.State.ErrorRet)
+			       errorCountInc()
+			       return false, err
+			   }
+			*/
 
-        if (searchResultCompID != "" && foundId > 0){
-            var xmlRelationResp xmlmcResponse
-            espXmlmc.ClearParam()
-            espXmlmc.SetParam("entity", "RelatedContainer")
-            //espXmlmc.SetParam("returnModifiedData", false)
-            espXmlmc.OpenElement("primaryEntityData")
-            espXmlmc.OpenElement("record")
-            espXmlmc.SetParam("h_container", searchResultCompID)
-            espXmlmc.SetParam("h_element", strconv.Itoa(foundId))
-            espXmlmc.SetParam("h_element_type", "Contact")
-            espXmlmc.SetParam("h_rel_type", "member")
-            espXmlmc.CloseElement("record")
-            espXmlmc.CloseElement("primaryEntityData")
-            XMLCreate, xmlmcErr = espXmlmc.Invoke("data", "entityAddRecord")
-            if xmlmcErr != nil {
-                errorCountInc()
-                return false, xmlmcErr
-            }
-            err := xml.Unmarshal([]byte(XMLCreate), &xmlRelationResp)
-            if err != nil {
-                errorCountInc()
-                return false, err
-            }
-            if xmlRespon.MethodResult != constOK {
-                err = errors.New(xmlRelationResp.State.ErrorRet)
-                errorCountInc()
-                return false, err
-            }
-        }
+			//### Addition for contact = organisation
+			var xmlCompRelationResp xmlmcResponse
+			espXmlmc.ClearParam()
+			espXmlmc.SetParam("entity", "OrganizationContacts")
+			espXmlmc.SetParam("returnModifiedData", "false")
+			espXmlmc.SetParam("formatValues", "false")
+			espXmlmc.SetParam("returnRawValues", "false")
+			espXmlmc.OpenElement("primaryEntityData")
+			espXmlmc.OpenElement("record")
+			espXmlmc.SetParam("h_organization_id", searchResultSiteID)
+			espXmlmc.SetParam("h_contact_id", strconv.Itoa(foundId))
+			espXmlmc.CloseElement("record")
+			espXmlmc.CloseElement("primaryEntityData")
+			//            logger(1, "Org Rel XML2 "+fmt.Sprintf("%s", espXmlmc.GetParam()), false)
+			XMLCreate, xmlmcErr = espXmlmc.Invoke("data", "entityAddRecord")
+			if xmlmcErr != nil {
+				errorCountInc()
+				return false, xmlmcErr
+			}
+			err = xml.Unmarshal([]byte(XMLCreate), &xmlCompRelationResp)
+			if err != nil {
+				errorCountInc()
+				return false, err
+			}
+			//logger(1, xmlCompRelationResp.State.ErrorRet, false)
+			// Fire and Forget
+		}
 
+		if foundId > 0 {
+			logger(1, "User Update Success", false)
+			updateCountInc()
+		} else {
+			logger(1, "User Create Success", false)
+			createCountInc()
+		}
 
-        if foundId > 0 {
-            logger(1, "User Update Success", false)
-            updateCountInc()
-        } else {
-            logger(1, "User Create Success", false)
-            createCountInc()
-        }
+		if SQLImportConf.AttachCustomerPortal {
+			var xmlRelationResp xmlmcResponse
+			espXmlmc.ClearParam()
+			espXmlmc.SetParam("portalId", "customer")
+			espXmlmc.SetParam("contactId", strconv.Itoa(foundId))
+			espXmlmc.SetParam("accessStatus", "approved")
+			XMLCreate, xmlmcErr = espXmlmc.Invoke("admin", "portalSetContactAccess")
+			if xmlmcErr != nil {
+				errorCountInc()
+				return false, xmlmcErr
+			}
+			err := xml.Unmarshal([]byte(XMLCreate), &xmlRelationResp)
+			if err != nil {
+				errorCountInc()
+				return false, err
+			}
+			if xmlRespon.MethodResult != constOK {
+				err = errors.New(xmlRelationResp.State.ErrorRet)
+				errorCountInc()
+				return false, err
+			}
+		}
 
-        if SQLImportConf.AttachCustomerPortal {
-            var xmlRelationResp xmlmcResponse
-            espXmlmc.ClearParam()
-            espXmlmc.SetParam("portalId", "customer")
-            espXmlmc.SetParam("contactId", strconv.Itoa(foundId))
-            espXmlmc.SetParam("accessStatus", "approved")
-            XMLCreate, xmlmcErr = espXmlmc.Invoke("admin", "portalSetContactAccess")
-            if xmlmcErr != nil {
-                errorCountInc()
-                return false, xmlmcErr
-            }
-            err := xml.Unmarshal([]byte(XMLCreate), &xmlRelationResp)
-            if err != nil {
-                errorCountInc()
-                return false, err
-            }
-            if xmlRespon.MethodResult != constOK {
-                err = errors.New(xmlRelationResp.State.ErrorRet)
-                errorCountInc()
-                return false, err
-            }
-        }
-
-        logger(1, buf2.String() , false)
+		logger(1, buf2.String(), false)
 		return true, nil
 	} else {
-    }
-    //-- DEBUG XML TO LOG FILE
-	var XMLSTRING = espXmlmc.GetParam()
-	logger(1, "User Create XML "+fmt.Sprintf("%s", XMLSTRING), false)
-    if foundId > 0 {
-        updateSkippedCountInc()
-	} else {
-        createSkippedCountInc()
 	}
-    espXmlmc.ClearParam()
+	//-- DEBUG XML TO LOG FILE
+	logger(1, "User Create XML "+fmt.Sprintf("%s", espXmlmc.GetParam()), false)
+	if foundId > 0 {
+		updateSkippedCountInc()
+	} else {
+		createSkippedCountInc()
+	}
+	espXmlmc.ClearParam()
 
 	return true, nil
 }
 
-
 func checkUserOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct) (int, error) {
-/*
-	espXmlmc.SetParam("entity", "Contact")
-	espXmlmc.SetParam("keyValue", contactID)
-	XMLCheckUser, xmlmcErr := espXmlmc.Invoke("data", "entityDoesRecordExist")
-	var xmlRespon xmlmcCheckUserResponse
-	if xmlmcErr != nil {
-		return false, xmlmcErr
-	}
-	err := xml.Unmarshal([]byte(XMLCheckUser), &xmlRespon)
-	if err != nil {
-		stringError := err.Error()
-		stringBody := string(XMLCheckUser)
-		errWithBody := errors.New(stringError + " RESPONSE BODY: " + stringBody)
-		return false, errWithBody
-	}
-	if xmlRespon.MethodResult != constOK {
-		err := errors.New(xmlRespon.State.ErrorRet)
-		return false, err
-	}
-	return xmlRespon.Params.RecordExist, nil
-*/
-    var intReturn int
-    intReturn = -1
-    
+	/*
+		espXmlmc.SetParam("entity", "Contact")
+		espXmlmc.SetParam("keyValue", contactID)
+		XMLCheckUser, xmlmcErr := espXmlmc.Invoke("data", "entityDoesRecordExist")
+		var xmlRespon xmlmcCheckUserResponse
+		if xmlmcErr != nil {
+			return false, xmlmcErr
+		}
+		err := xml.Unmarshal([]byte(XMLCheckUser), &xmlRespon)
+		if err != nil {
+			stringError := err.Error()
+			stringBody := string(XMLCheckUser)
+			errWithBody := errors.New(stringError + " RESPONSE BODY: " + stringBody)
+			return false, errWithBody
+		}
+		if xmlRespon.MethodResult != constOK {
+			err := errors.New(xmlRespon.State.ErrorRet)
+			return false, err
+		}
+		return xmlRespon.Params.RecordExist, nil
+	*/
+	var intReturn int
+	intReturn = -1
+
 	espXmlmc.SetParam("entity", "Contact")
 	espXmlmc.SetParam("matchScope", "all")
 	espXmlmc.OpenElement("searchFilter")
@@ -970,7 +996,7 @@ func checkUserOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct) (in
 	XMLCheckUser, xmlmcErr := espXmlmc.Invoke("data", "entityBrowseRecords")
 	var xmlRespon xmlmcCheckUserResponse
 	if xmlmcErr != nil {
-	//	buffer.WriteString(loggerGen(4, "Unable to Search for Contact: "+fmt.Sprintf("%v", xmlmcErr)))
+		//	buffer.WriteString(loggerGen(4, "Unable to Search for Contact: "+fmt.Sprintf("%v", xmlmcErr)))
 		logger(4, "Unable to Search for Contact: "+fmt.Sprintf("%v", xmlmcErr), true)
 	}
 	err := xml.Unmarshal([]byte(XMLCheckUser), &xmlRespon)
@@ -984,7 +1010,7 @@ func checkUserOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct) (in
 		} else {
 			//-- Check Response
 			if xmlRespon.Params.RowData.Row.PKID != "" {
-                intReturn, err = strconv.Atoi(xmlRespon.Params.RowData.Row.PKID)
+				intReturn, err = strconv.Atoi(xmlRespon.Params.RowData.Row.PKID)
 			}
 		}
 	}
@@ -996,33 +1022,35 @@ func checkUserOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct) (in
 //-- Function to search for site
 func getSiteFromLookup(site string, buffer *bytes.Buffer) (string, string) {
 	siteReturn := ""
-    compReturn := ""
-/*	//-- Check if Site Attribute is set
-	if SQLImportConf.SiteLookup.Attribute == "" {
-		buffer.WriteString(loggerGen(4, "Site Lookup is Enabled but Attribute is not Defined"))
-		return ""
-	}
-	//-- Get Value of Attribute
-	buffer.WriteString(loggerGen(1, "SQL Attribute for Site Lookup: "+SQLImportConf.SiteLookup.Attribute))
-*/
+	compReturn := ""
+	/*	//-- Check if Site Attribute is set
+		if SQLImportConf.SiteLookup.Attribute == "" {
+			buffer.WriteString(loggerGen(4, "Site Lookup is Enabled but Attribute is not Defined"))
+			return ""
+		}
+		//-- Get Value of Attribute
+		buffer.WriteString(loggerGen(1, "SQL Attribute for Site Lookup: "+SQLImportConf.SiteLookup.Attribute))
+	*/
 	//-- Get Value of Attribute
 	siteAttributeName := processComplexField(site)
 	buffer.WriteString(loggerGen(1, "Looking Up Site: "+siteAttributeName))
 	if siteAttributeName == "" {
 		return "", ""
-	}    
+	}
 	siteIsInCache, SiteIDCache, CompID := orgInCache(siteAttributeName)
 	//-- Check if we have Cached the site already
 	if siteIsInCache {
+		//fmt.Println("IN CACHE")
 		siteReturn = strconv.Itoa(SiteIDCache)
-        compReturn = CompID
-		buffer.WriteString(loggerGen(1, "Found Site in Cache: "+siteReturn+ " ("+CompID+")"))
+		compReturn = CompID
+		buffer.WriteString(loggerGen(1, "Found Site in Cache: "+siteReturn+" ("+CompID+")"))
 	} else {
+		//fmt.Println("NO CACHE")
 		siteIsOnInstance, SiteIDInstance, compIDInstance := searchOrg(siteAttributeName, buffer)
 		//-- If Returned set output
 		if siteIsOnInstance {
 			siteReturn = strconv.Itoa(SiteIDInstance)
-            compReturn = compIDInstance
+			compReturn = compIDInstance
 		}
 	}
 	buffer.WriteString(loggerGen(1, "Site Lookup found ID: "+siteReturn))
@@ -1030,22 +1058,21 @@ func getSiteFromLookup(site string, buffer *bytes.Buffer) (string, string) {
 }
 
 func processComplexField(s string) string {
-	return html.UnescapeString(s);
+	return html.UnescapeString(s)
 }
-
 
 //-- Function to Check if in Cache
 func orgInCache(orgName string) (bool, int, string) {
 	boolReturn := false
 	intReturn := 0
-    stringCompReturn := ""
+	stringCompReturn := ""
 	mutexSites.Lock()
 	//-- Check if in Cache
 	for _, site := range sites {
 		if site.OrgName == orgName {
 			boolReturn = true
 			intReturn = site.OrgID
-            stringCompReturn = site.CompanyID
+			stringCompReturn = site.CompanyID
 			break
 		}
 	}
@@ -1057,7 +1084,7 @@ func orgInCache(orgName string) (bool, int, string) {
 func searchOrg(orgName string, buffer *bytes.Buffer) (bool, int, string) {
 	boolReturn := false
 	intReturn := 0
-    strCompReturn := ""
+	strCompReturn := ""
 	//-- ESP Query for site
 	espXmlmc := apiLib.NewXmlmcInstance(SQLImportConf.URL)
 	espXmlmc.SetAPIKey(SQLImportConf.APIKey)
@@ -1068,10 +1095,13 @@ func searchOrg(orgName string, buffer *bytes.Buffer) (bool, int, string) {
 	espXmlmc.SetParam("matchScope", "all")
 	espXmlmc.OpenElement("searchFilter")
 	espXmlmc.SetParam("h_organization_name", orgName)
+	//	espXmlmc.SetParam("column", "h_organization_name")
+	//	espXmlmc.SetParam("value", orgName)
 	espXmlmc.CloseElement("searchFilter")
 	espXmlmc.SetParam("maxResults", "1")
+	//fmt.Println(espXmlmc.GetParam())
 	XMLSiteSearch, xmlmcErr := espXmlmc.Invoke("data", "entityBrowseRecords")
-    
+	//fmt.Println(XMLSiteSearch)
 	var xmlRespon xmlmcSiteListResponse
 	if xmlmcErr != nil {
 		buffer.WriteString(loggerGen(4, "Unable to Search for Organisation: "+fmt.Sprintf("%v", xmlmcErr)))
@@ -1088,45 +1118,45 @@ func searchOrg(orgName string, buffer *bytes.Buffer) (bool, int, string) {
 				if strings.ToLower(xmlRespon.Params.RowData.Row.OrganizationName) == strings.ToLower(orgName) {
 					intReturn = xmlRespon.Params.RowData.Row.OrganizationId
 					boolReturn = true
-                    
-                    var xml2Resp xmlmcGroupListResponse
-                    espXmlmc.ClearParam()
-                    espXmlmc.SetParam("entity", "Container")
-                    espXmlmc.SetParam("matchScope", "all")
-                    //espXmlmc.SetParam("returnModifiedData", false)
-                    espXmlmc.OpenElement("searchFilter")
-                    espXmlmc.SetParam("h_name", orgName)
-                    espXmlmc.SetParam("h_type", "Organizations")
-                    espXmlmc.CloseElement("searchFilter")
-                    XMLOrgSearch, xmlmcOSErr := espXmlmc.Invoke("data", "entityBrowseRecords")
-                    if xmlmcOSErr != nil {
-                        buffer.WriteString(loggerGen(4, "Unable to Search for Container: "+fmt.Sprintf("%v", xmlmcOSErr)))
-                        errorCountInc()
-                    } else {
-                        err := xml.Unmarshal([]byte(XMLOrgSearch), &xml2Resp)
-                        if err != nil {
-                            buffer.WriteString(loggerGen(4, "Unable to read container response: "+fmt.Sprintf("%v", err)))
-                            buffer.WriteString(loggerGen(4, fmt.Sprintf("%v", XMLOrgSearch)))
-                            errorCountInc()
-                        } else if xml2Resp.MethodResult != constOK {
-                            buffer.WriteString(loggerGen(4, fmt.Sprintf("%v", XMLOrgSearch)))
-                            buffer.WriteString(loggerGen(4, "Unable to deal with container response: "+xmlRespon.State.ErrorRet))
-                            err = errors.New(xml2Resp.State.ErrorRet)
-                            errorCountInc()
-                        } else {
-                            strCompReturn = xml2Resp.Params.RowData.Row.GroupID
-                        }
-                        
-                    }
-                    //-- Add Site to Cache
-                    mutexSites.Lock()
-                    var newSiteForCache siteListStruct
-                    newSiteForCache.OrgID = intReturn
-                    newSiteForCache.OrgName = orgName
-                    newSiteForCache.CompanyID = strCompReturn
-                    name := []siteListStruct{newSiteForCache}
-                    sites = append(sites, name...)
-                    mutexSites.Unlock()
+
+					var xml2Resp xmlmcGroupListResponse
+					espXmlmc.ClearParam()
+					espXmlmc.SetParam("entity", "Container")
+					espXmlmc.SetParam("matchScope", "all")
+					//espXmlmc.SetParam("returnModifiedData", false)
+					espXmlmc.OpenElement("searchFilter")
+					espXmlmc.SetParam("h_name", orgName)
+					espXmlmc.SetParam("h_type", "Organizations")
+					espXmlmc.CloseElement("searchFilter")
+					XMLOrgSearch, xmlmcOSErr := espXmlmc.Invoke("data", "entityBrowseRecords")
+					if xmlmcOSErr != nil {
+						buffer.WriteString(loggerGen(4, "Unable to Search for Container: "+fmt.Sprintf("%v", xmlmcOSErr)))
+						errorCountInc()
+					} else {
+						err := xml.Unmarshal([]byte(XMLOrgSearch), &xml2Resp)
+						if err != nil {
+							buffer.WriteString(loggerGen(4, "Unable to read container response: "+fmt.Sprintf("%v", err)))
+							buffer.WriteString(loggerGen(4, fmt.Sprintf("%v", XMLOrgSearch)))
+							errorCountInc()
+						} else if xml2Resp.MethodResult != constOK {
+							buffer.WriteString(loggerGen(4, fmt.Sprintf("%v", XMLOrgSearch)))
+							buffer.WriteString(loggerGen(4, "Unable to deal with container response: "+xmlRespon.State.ErrorRet))
+							err = errors.New(xml2Resp.State.ErrorRet)
+							errorCountInc()
+						} else {
+							strCompReturn = xml2Resp.Params.RowData.Row.GroupID
+						}
+
+					}
+					//-- Add Site to Cache
+					mutexSites.Lock()
+					var newSiteForCache siteListStruct
+					newSiteForCache.OrgID = intReturn
+					newSiteForCache.OrgName = orgName
+					newSiteForCache.CompanyID = strCompReturn
+					name := []siteListStruct{newSiteForCache}
+					sites = append(sites, name...)
+					mutexSites.Unlock()
 
 				}
 			}
