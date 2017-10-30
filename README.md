@@ -1,3 +1,3 @@
-### DB Import Go - [GO](https://golang.org/) Import Script to Hornbill
+### DB Contact Import Go - [GO](https://golang.org/) Import Script to Hornbill
 
-### To be continued...
+Please see [SQL Contact Import](https://wiki.hornbill.com/index.php/SQL_Contact_Import) for instructions.
