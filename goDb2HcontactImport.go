@@ -88,7 +88,13 @@ var (
 		"language",
 		"private",
 		"rights",
-		"contact_status"}
+		"contact_status",
+		"custom_1",
+		"custom_2",
+		"custom_3",
+		"custom_4",
+		"custom_5",
+		"custom_6"}
 )
 
 type siteListStruct struct {
@@ -143,6 +149,12 @@ type contactMappingStruct struct {
 	private        string
 	rights         string
 	contact_status string
+	custom_1       string
+	custom_2       string
+	custom_3       string
+	custom_4       string
+	custom_5       string
+	custom_6       string
 }
 
 type SQLImportConfStruct struct {
