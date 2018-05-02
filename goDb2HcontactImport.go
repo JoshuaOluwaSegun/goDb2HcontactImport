@@ -34,7 +34,7 @@ import (
 //----- Constants -----
 const (
 	letterBytes  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	version      = "1.0.1"
+	version      = "1.0.2"
 	constOK      = "ok"
 	updateString = "Update"
 	createString = "Create"
