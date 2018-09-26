@@ -34,7 +34,7 @@ import (
 //----- Constants -----
 const (
 	letterBytes  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	version      = "1.0.2"
+	version      = "1.0.3"
 	constOK      = "ok"
 	updateString = "Update"
 	createString = "Create"
@@ -1001,11 +1001,12 @@ func checkUserOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct) (in
 	espXmlmc.SetParam("entity", "Contact")
 	espXmlmc.SetParam("matchScope", "all")
 	espXmlmc.OpenElement("searchFilter")
-	espXmlmc.SetParam("h_logon_id", contactID)
+	espXmlmc.SetParam("column", "h_logon_id")
+	espXmlmc.SetParam("value", contactID)
 	espXmlmc.CloseElement("searchFilter")
 	espXmlmc.SetParam("maxResults", "1")
 
-	XMLCheckUser, xmlmcErr := espXmlmc.Invoke("data", "entityBrowseRecords")
+	XMLCheckUser, xmlmcErr := espXmlmc.Invoke("data", "entityBrowseRecords2")
 	var xmlRespon xmlmcCheckUserResponse
 	if xmlmcErr != nil {
 		//	buffer.WriteString(loggerGen(4, "Unable to Search for Contact: "+fmt.Sprintf("%v", xmlmcErr)))
@@ -1106,13 +1107,13 @@ func searchOrg(orgName string, buffer *bytes.Buffer) (bool, int, string) {
 	espXmlmc.SetParam("entity", "Organizations")
 	espXmlmc.SetParam("matchScope", "all")
 	espXmlmc.OpenElement("searchFilter")
-	espXmlmc.SetParam("h_organization_name", orgName)
-	//	espXmlmc.SetParam("column", "h_organization_name")
-	//	espXmlmc.SetParam("value", orgName)
+	//espXmlmc.SetParam("h_organization_name", orgName)
+	espXmlmc.SetParam("column", "h_organization_name")
+	espXmlmc.SetParam("value", orgName)
 	espXmlmc.CloseElement("searchFilter")
 	espXmlmc.SetParam("maxResults", "1")
 	//fmt.Println(espXmlmc.GetParam())
-	XMLSiteSearch, xmlmcErr := espXmlmc.Invoke("data", "entityBrowseRecords")
+	XMLSiteSearch, xmlmcErr := espXmlmc.Invoke("data", "entityBrowseRecords2")
 	//fmt.Println(XMLSiteSearch)
 	var xmlRespon xmlmcSiteListResponse
 	if xmlmcErr != nil {
@@ -1136,11 +1137,18 @@ func searchOrg(orgName string, buffer *bytes.Buffer) (bool, int, string) {
 					espXmlmc.SetParam("entity", "Container")
 					espXmlmc.SetParam("matchScope", "all")
 					//espXmlmc.SetParam("returnModifiedData", false)
-					espXmlmc.OpenElement("searchFilter")
-					espXmlmc.SetParam("h_name", orgName)
-					espXmlmc.SetParam("h_type", "Organizations")
+					espXmlmc.OpenElement("searchFilter")					
+					espXmlmc.SetParam("column", "h_name")
+					espXmlmc.SetParam("value", contactID)
 					espXmlmc.CloseElement("searchFilter")
-					XMLOrgSearch, xmlmcOSErr := espXmlmc.Invoke("data", "entityBrowseRecords")
+					
+					espXmlmc.OpenElement("searchFilter")
+					espXmlmc.SetParam("column", "h_type")
+					espXmlmc.SetParam("value", contactID)	
+					//espXmlmc.SetParam("h_name", orgName)
+					//espXmlmc.SetParam("h_type", "Organizations")
+					espXmlmc.CloseElement("searchFilter")
+					XMLOrgSearch, xmlmcOSErr := espXmlmc.Invoke("data", "entityBrowseRecords2")
 					if xmlmcOSErr != nil {
 						buffer.WriteString(loggerGen(4, "Unable to Search for Container: "+fmt.Sprintf("%v", xmlmcOSErr)))
 						errorCountInc()
