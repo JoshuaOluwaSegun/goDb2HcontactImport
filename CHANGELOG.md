@@ -1,3 +1,9 @@
+## 1.1.0 (November 5th, 2018)
+
+Features:
+
+  - Added ability to modify search field (h_logon_id is not a mandatory field and not necessarily used).
+
 ## 1.0.3 (September 26th, 2018)
 
 Fixes:

@@ -34,7 +34,7 @@ import (
 //----- Constants -----
 const (
 	letterBytes  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	version      = "1.0.3"
+	version      = "1.1.0"
 	constOK      = "ok"
 	updateString = "Update"
 	createString = "Create"
@@ -216,6 +216,7 @@ type sqlConfStruct struct {
 	Database  string
 	Encrypt   bool
 	ContactID string
+	FieldID string
 }
 
 type xmlmcuserSetGroupOptionsResponse struct {
@@ -1001,7 +1002,7 @@ func checkUserOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct) (in
 	espXmlmc.SetParam("entity", "Contact")
 	espXmlmc.SetParam("matchScope", "all")
 	espXmlmc.OpenElement("searchFilter")
-	espXmlmc.SetParam("column", "h_logon_id")
+	espXmlmc.SetParam("column", SQLImportConf.SQLConf.ContactID)
 	espXmlmc.SetParam("value", contactID)
 	espXmlmc.CloseElement("searchFilter")
 	espXmlmc.SetParam("maxResults", "1")

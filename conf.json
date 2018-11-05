@@ -12,6 +12,7 @@
         "Password": "",
         "Port": 5002,
         "ContactID": "FIELD1",
+        "FieldID": "h_logon_id",
         "Encrypt": false,
         "Query": "SELECT * FROM adbc.csv"
     },
