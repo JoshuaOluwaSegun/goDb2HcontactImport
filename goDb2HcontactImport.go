@@ -1002,7 +1002,7 @@ func checkUserOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct) (in
 	espXmlmc.SetParam("entity", "Contact")
 	espXmlmc.SetParam("matchScope", "all")
 	espXmlmc.OpenElement("searchFilter")
-	espXmlmc.SetParam("column", SQLImportConf.SQLConf.ContactID)
+	espXmlmc.SetParam("column", SQLImportConf.SQLConf.FieldID)
 	espXmlmc.SetParam("value", contactID)
 	espXmlmc.CloseElement("searchFilter")
 	espXmlmc.SetParam("maxResults", "1")
