@@ -1,3 +1,17 @@
+## 1.2.0 (November 8th, 2018)
+
+Features:
+
+  - Added ability to allow the contacts to see organisation level call viewing via portal (CustomerPortalOrgView: true; CustomerPortalOrgViewRevoke: false).
+  - Added ability to revoke those rights for imported contacts  (CustomerPortalOrgView: true; CustomerPortalOrgViewRevoke: true).
+  - CustomerPortalOrgView: false will not modify the organisation level call viewing
+
+## 1.1.1 (November 5th, 2018)
+
+Fixes:
+
+  - tweak to fix new search field allocation
+
 ## 1.1.0 (November 5th, 2018)
 
 Features:

@@ -3,6 +3,8 @@
     "InstanceId": "",
     "ContactAction": "Create",
     "AttachCustomerPortal": true,
+    "CustomerPortalOrgView": true,
+    "CustomerPortalOrgViewRevoke": false,
     "UpdateContactStatus": false,
     "SQLConf": {
         "Driver": "csv",

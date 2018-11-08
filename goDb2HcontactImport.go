@@ -34,7 +34,7 @@ import (
 //----- Constants -----
 const (
 	letterBytes  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	version      = "1.1.1"
+	version      = "1.2.0"
 	constOK      = "ok"
 	updateString = "Update"
 	createString = "Create"
@@ -158,15 +158,17 @@ type contactMappingStruct struct {
 }
 
 type SQLImportConfStruct struct {
-	APIKey               string
-	InstanceID           string
-	URL                  string
-	ContactAction        string
-	AttachCustomerPortal bool
-	UpdateContactStatus  bool
-	SQLConf              sqlConfStruct
-	ContactMapping       map[string]string
-	SQLAttributes        []string
+	APIKey                      string
+	InstanceID                  string
+	URL                         string
+	ContactAction               string
+	AttachCustomerPortal        bool
+	CustomerPortalOrgView       bool
+	CustomerPortalOrgViewRevoke bool
+	UpdateContactStatus         bool
+	SQLConf                     sqlConfStruct
+	ContactMapping              map[string]string
+	SQLAttributes               []string
 }
 type xmlmcResponse struct {
 	MethodResult string       `xml:"status,attr"`
@@ -216,7 +218,7 @@ type sqlConfStruct struct {
 	Database  string
 	Encrypt   bool
 	ContactID string
-	FieldID string
+	FieldID   string
 }
 
 type xmlmcuserSetGroupOptionsResponse struct {
@@ -756,16 +758,16 @@ func processUsers(arrUsers []map[string]interface{}) {
 				//-- Update or Create Asset
 				if !isErr {
 					if foundId > 0 && SQLImportConf.ContactAction != createString {
-						logger(1, fmt.Sprintf("Update Customer: %s (%d)", contactID, foundId), false)
+						logger(1, fmt.Sprintf("Update Contact: %s (%d)", contactID, foundId), false)
 						_, errUpdate := updateUser(userMap, espXmlmc, foundId)
 						if errUpdate != nil {
-							logger(4, "Unable to Update User: "+fmt.Sprintf("%v", errUpdate), false)
+							logger(4, "Unable to Update Contact: "+fmt.Sprintf("%v", errUpdate), false)
 						}
 					} else if foundId < 0 && SQLImportConf.ContactAction != updateString {
-						logger(1, "Create Customer: "+contactID, false)
+						logger(1, "Create Contact: "+contactID, false)
 						_, errorCreate := updateUser(userMap, espXmlmc, foundId)
 						if errorCreate != nil {
-							logger(4, "Unable to Create User: "+fmt.Sprintf("%v", errorCreate), false)
+							logger(4, "Unable to Create Contact: "+fmt.Sprintf("%v", errorCreate), false)
 						}
 					}
 				}
@@ -862,6 +864,7 @@ func updateUser(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, foun
 		if foundId < 0 {
 			foundId, err = strconv.Atoi(xmlRespon.Params.RowData.Row.PkID)
 		}
+		logger(1, "Contact ID: "+strconv.Itoa(foundId), false)
 		//fmt.Println(xmlRespon.Params.RowData.Row.PkID + " --- " + strconv.Itoa(foundId) + " ::: " + searchResultSiteID)
 		//fmt.Sprintln("%v",xmlRespon.Params.RowData.Row)
 		//        if (searchResultCompID != "" && foundId > 0){
@@ -943,19 +946,52 @@ func updateUser(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, foun
 			espXmlmc.SetParam("accessStatus", "approved")
 			XMLCreate, xmlmcErr = espXmlmc.Invoke("admin", "portalSetContactAccess")
 			if xmlmcErr != nil {
+				logger(1, "Attaching to Portal Unsuccessful", false)
 				errorCountInc()
 				return false, xmlmcErr
 			}
 			err := xml.Unmarshal([]byte(XMLCreate), &xmlRelationResp)
 			if err != nil {
+				logger(1, "Attaching to Portal Failed?", false)
 				errorCountInc()
 				return false, err
 			}
-			if xmlRespon.MethodResult != constOK {
+			if xmlRelationResp.MethodResult != constOK {
 				err = errors.New(xmlRelationResp.State.ErrorRet)
+				logger(1, "Attaching to Portal Failed?!", false)
 				errorCountInc()
 				return false, err
 			}
+			logger(1, "Attaching to Portal Successful", false)
+		}
+		//######
+		if SQLImportConf.CustomerPortalOrgView {
+			var xmlPortalOrgViewResp xmlmcResponse
+			espXmlmc.ClearParam()
+			espXmlmc.SetParam("userId", strconv.Itoa(foundId))
+			if SQLImportConf.CustomerPortalOrgViewRevoke {
+				espXmlmc.SetParam("level", "0")
+			} else {
+				espXmlmc.SetParam("level", "1")
+			}
+			espXmlmc.SetParam("level", "1")
+			XMLCreate, xmlmcErr = espXmlmc.Invoke("apps/com.hornbill.servicemanager/ContactOrgRequests", "changeOrgRequestSetting")
+			if xmlmcErr != nil {
+				logger(1, "Allowing Org View Unsuccessful", false)
+				errorCountInc()
+				return false, xmlmcErr
+			}
+			err := xml.Unmarshal([]byte(XMLCreate), &xmlPortalOrgViewResp)
+			if err != nil {
+				logger(3, "Allowing Org View Failed?", false)
+				return false, err
+			}
+			if xmlPortalOrgViewResp.MethodResult != constOK {
+				err = errors.New(xmlPortalOrgViewResp.State.ErrorRet)
+				logger(3, "Allowing Org View Failed?!", false)
+				return false, err
+			}
+			logger(1, "Allowing Org View Successful", false)
 		}
 
 		logger(1, buf2.String(), false)
@@ -1138,14 +1174,14 @@ func searchOrg(orgName string, buffer *bytes.Buffer) (bool, int, string) {
 					espXmlmc.SetParam("entity", "Container")
 					espXmlmc.SetParam("matchScope", "all")
 					//espXmlmc.SetParam("returnModifiedData", false)
-					espXmlmc.OpenElement("searchFilter")					
+					espXmlmc.OpenElement("searchFilter")
 					espXmlmc.SetParam("column", "h_name")
 					espXmlmc.SetParam("value", orgName)
 					espXmlmc.CloseElement("searchFilter")
-					
+
 					espXmlmc.OpenElement("searchFilter")
 					espXmlmc.SetParam("column", "h_type")
-					espXmlmc.SetParam("value", "Organizations")	
+					espXmlmc.SetParam("value", "Organizations")
 					//espXmlmc.SetParam("h_name", orgName)
 					//espXmlmc.SetParam("h_type", "Organizations")
 					espXmlmc.CloseElement("searchFilter")
