@@ -1,3 +1,9 @@
+## 1.2.1 (November 20th, 2018)
+
+Fixes:
+
+  - tweak to properly relate organisation to contact
+
 ## 1.2.0 (November 8th, 2018)
 
 Features:

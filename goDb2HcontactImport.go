@@ -34,7 +34,7 @@ import (
 //----- Constants -----
 const (
 	letterBytes  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	version      = "1.2.0"
+	version      = "1.2.1"
 	constOK      = "ok"
 	updateString = "Update"
 	createString = "Create"
@@ -782,7 +782,7 @@ func processUsers(arrUsers []map[string]interface{}) {
 func updateUser(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, foundId int) (bool, error) {
 	buf2 := bytes.NewBufferString("")
 	searchResultSiteID := ""
-	//searchResultCompID := ""
+	searchResultCompID := ""
 	//-- Do we Lookup Site
 	var p map[string]string
 	p = make(map[string]string)
@@ -820,8 +820,8 @@ func updateUser(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, foun
 		} else if field == "company" && value != "" {
 			espXmlmc.SetParam("h_"+field, value)
 			//search IF result:
-			//searchResultSiteID, searchResultCompID = getSiteFromLookup(value, buf2)
-			searchResultSiteID, _ = getSiteFromLookup(value, buf2)
+			searchResultSiteID, searchResultCompID = getSiteFromLookup(value, buf2)
+			//searchResultSiteID, _ = getSiteFromLookup(value, buf2)
 			if searchResultSiteID != "" {
 				espXmlmc.SetParam("h_organization_id", searchResultSiteID)
 			}
@@ -876,7 +876,7 @@ func updateUser(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, foun
 			//espXmlmc.SetParam("returnModifiedData", false)
 			espXmlmc.OpenElement("primaryEntityData")
 			espXmlmc.OpenElement("record")
-			espXmlmc.SetParam("h_container", searchResultSiteID)
+			espXmlmc.SetParam("h_container", searchResultCompID)
 			espXmlmc.SetParam("h_element", strconv.Itoa(foundId))
 			espXmlmc.SetParam("h_element_type", "Contact")
 			espXmlmc.SetParam("h_rel_type", "member")
