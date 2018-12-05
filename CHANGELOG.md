@@ -1,3 +1,9 @@
+## 1.2.2 (December 5th, 2018)
+
+Fixes:
+
+  - tweak to correct privilege level
+
 ## 1.2.1 (November 20th, 2018)
 
 Fixes:

@@ -34,7 +34,7 @@ import (
 //----- Constants -----
 const (
 	letterBytes  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	version      = "1.2.1"
+	version      = "1.2.2"
 	constOK      = "ok"
 	updateString = "Update"
 	createString = "Create"
@@ -974,7 +974,6 @@ func updateUser(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, foun
 			} else {
 				espXmlmc.SetParam("level", "1")
 			}
-			espXmlmc.SetParam("level", "1")
 			XMLCreate, xmlmcErr = espXmlmc.Invoke("apps/com.hornbill.servicemanager/ContactOrgRequests", "changeOrgRequestSetting")
 			if xmlmcErr != nil {
 				logger(1, "Allowing Org View Unsuccessful", false)
