@@ -17,7 +17,6 @@ func procFlags() {
 	flag.StringVar(&configLogPrefix, "logprefix", "", "Add prefix to the logfile")
 	flag.BoolVar(&configDryRun, "dryrun", false, "Allow the Import to run without Creating or Updating Contacts")
 	flag.BoolVar(&configVersion, "version", false, "Output Version")
-	flag.IntVar(&configWorkers, "workers", 1, "Number of Worker threads to use")
 	flag.StringVar(&configMaxRoutines, "concurrent", "1", "Maximum number of requests to import concurrently.")
 
 	//-- Parse Flags
@@ -50,7 +49,6 @@ func outputFlags() {
 	logger(1, "Flag - Config File "+configFileName, true)
 	logger(1, "Flag - Log Prefix "+configLogPrefix, true)
 	logger(1, "Flag - Dry Run "+fmt.Sprintf("%v", configDryRun), true)
-	logger(1, "Flag - Workers "+fmt.Sprintf("%v", configWorkers), false)
 }
 
 //-- Check Latest

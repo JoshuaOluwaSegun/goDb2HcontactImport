@@ -21,7 +21,6 @@ var (
 	configLogPrefix    string
 	configDryRun       bool
 	configVersion      bool
-	configWorkers      int
 	configMaxRoutines  string
 	timeNow            string
 	startTime          time.Time
