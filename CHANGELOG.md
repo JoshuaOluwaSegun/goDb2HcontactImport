@@ -1,3 +1,15 @@
+# CHANGELOG
+
+## 1.3.0 (March 6th, 2019)
+
+Features:
+
+- Removed zone command line parameter, tool no longer needs to be provided instance zone
+- Added support for MySQL 8+
+- Corrected logic for logging number of updated or created contacts
+- Improved error logging
+- Refactored code
+
 ## 1.2.2 (December 5th, 2018)
 
 Fixes:
