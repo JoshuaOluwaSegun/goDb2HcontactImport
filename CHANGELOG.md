@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.4.0 (July 30th, 2019)
+
+Features:
+
+- Since the introduction of entityBrowseRecords2, the search is done on a LIKE format instead of an exact match (case-insentive). Have now made exact match default behaviour, if you wish to revert to the behaviour from v1.0.3 until now, use the -matchlike=true command line parameter.
+
 ## 1.3.0 (March 6th, 2019)
 
 Features:

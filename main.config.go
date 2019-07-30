@@ -15,6 +15,7 @@ func procFlags() {
 	//-- Grab Flags
 	flag.StringVar(&configFileName, "file", "conf.json", "Name of Configuration File To Load")
 	flag.StringVar(&configLogPrefix, "logprefix", "", "Add prefix to the logfile")
+	flag.BoolVar(&configMatchLike, "matchlike", false, "Allow the Import to Search Contact by LIKE")
 	flag.BoolVar(&configDryRun, "dryrun", false, "Allow the Import to run without Creating or Updating Contacts")
 	flag.BoolVar(&configVersion, "version", false, "Output Version")
 	flag.StringVar(&configMaxRoutines, "concurrent", "1", "Maximum number of requests to import concurrently.")

@@ -8,7 +8,7 @@ import (
 
 //----- Constants -----
 const (
-	version = "1.3.0"
+	version = "1.4.0"
 	constOK = "ok"
 )
 
@@ -21,6 +21,7 @@ var (
 	configLogPrefix    string
 	configDryRun       bool
 	configVersion      bool
+	configMatchLike    bool
 	configMaxRoutines  string
 	timeNow            string
 	startTime          time.Time
@@ -104,6 +105,12 @@ type xmlmcResponse struct {
 	Params       paramsStruct `xml:"params"`
 	State        stateStruct  `xml:"state"`
 }
+type xmlmcExactContactResponse struct {
+	MethodResult string      `xml:"status,attr"`
+	PKID         string      `xml:"params>primaryEntityData>h_pk_id"`
+	State        stateStruct `xml:"state"`
+}
+
 type xmlmcCheckContactResponse struct {
 	MethodResult string                        `xml:"status,attr"`
 	Params       paramsContactSearchListStruct `xml:"params"`

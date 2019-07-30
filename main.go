@@ -343,39 +343,74 @@ func upsertContact(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, f
 
 func checkContactOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct, buffer *bytes.Buffer) (int, error) {
 	intReturn := -1
-
+	var err error
 	espXmlmc.SetParam("entity", "Contact")
-	espXmlmc.SetParam("matchScope", "all")
-	espXmlmc.OpenElement("searchFilter")
-	espXmlmc.SetParam("column", SQLImportConf.SQLConf.FieldID)
-	espXmlmc.SetParam("value", contactID)
-	espXmlmc.CloseElement("searchFilter")
-	espXmlmc.SetParam("maxResults", "1")
 
-	XMLCheckContact, xmlmcErr := espXmlmc.Invoke("data", "entityBrowseRecords2")
-	var xmlRespon xmlmcCheckContactResponse
-	if xmlmcErr != nil {
-		buffer.WriteString(loggerGen(3, "Search for Contact Unsuccessful. API Invoke Error from [entityBrowseRecords2] [Contact]: "+fmt.Sprintf("%v", xmlmcErr)))
-		return intReturn, xmlmcErr
-	}
-	err := xml.Unmarshal([]byte(XMLCheckContact), &xmlRespon)
-	if err != nil {
-		buffer.WriteString(loggerGen(3, "Search for Contact Unsuccessful. Unmarshall Error from [entityBrowseRecords2] [Contact]: "+fmt.Sprintf("%v", err)))
-	} else {
-		if xmlRespon.MethodResult != constOK {
-			err = errors.New(xmlRespon.State.ErrorRet)
-			buffer.WriteString(loggerGen(3, "Search for Contact Unsuccessful. MethodResult not OK from [entityBrowseRecords2] [Contact]: "+fmt.Sprintf("%v", err)))
+	if configMatchLike {
+		espXmlmc.SetParam("matchScope", "all")
+		espXmlmc.OpenElement("searchFilter")
+		espXmlmc.SetParam("column", SQLImportConf.SQLConf.FieldID)
+		espXmlmc.SetParam("value", contactID)
+		espXmlmc.CloseElement("searchFilter")
+		espXmlmc.SetParam("maxResults", "1")
+
+		XMLCheckContact, xmlmcErr := espXmlmc.Invoke("data", "entityBrowseRecords2")
+		var xmlRespon xmlmcCheckContactResponse
+		if xmlmcErr != nil {
+			buffer.WriteString(loggerGen(3, "Search for Contact Unsuccessful. API Invoke Error from [entityBrowseRecords2] [Contact]: "+fmt.Sprintf("%v", xmlmcErr)))
+			return intReturn, xmlmcErr
+		}
+		err = xml.Unmarshal([]byte(XMLCheckContact), &xmlRespon)
+		if err != nil {
+			buffer.WriteString(loggerGen(3, "Search for Contact Unsuccessful. Unmarshall Error from [entityBrowseRecords2] [Contact]: "+fmt.Sprintf("%v", err)))
 		} else {
-			//-- Check Response
-			if xmlRespon.Params.RowData.Row.PKID != "" {
-				intReturn, err = strconv.Atoi(xmlRespon.Params.RowData.Row.PKID)
-				if err != nil {
-					buffer.WriteString(loggerGen(3, "Search for Contact Unsuccessful. Key Type Conversion Failed [entityBrowseRecords2] [Contact]: "+fmt.Sprintf("%v", err)))
-					intReturn = -1
+			if xmlRespon.MethodResult != constOK {
+				err = errors.New(xmlRespon.State.ErrorRet)
+				buffer.WriteString(loggerGen(3, "Search for Contact Unsuccessful. MethodResult not OK from [entityBrowseRecords2] [Contact]: "+fmt.Sprintf("%v", err)))
+			} else {
+				//-- Check Response
+				if xmlRespon.Params.RowData.Row.PKID != "" {
+					intReturn, err = strconv.Atoi(xmlRespon.Params.RowData.Row.PKID)
+					if err != nil {
+						buffer.WriteString(loggerGen(3, "Search for Contact Unsuccessful. Key Type Conversion Failed [entityBrowseRecords2] [Contact]: "+fmt.Sprintf("%v", err)))
+						intReturn = -1
+					}
 				}
 			}
 		}
+
+	} else {
+		espXmlmc.SetParam("searchQuery", SQLImportConf.SQLConf.FieldID+":"+contactID)
+		espXmlmc.SetParam("resultsFrom", "0")
+		espXmlmc.SetParam("resultsTo", "0")
+
+		XMLCheckContact, xmlmcErr := espXmlmc.Invoke("data", "entitySearch")
+		var xmlRespon xmlmcExactContactResponse
+		if xmlmcErr != nil {
+			buffer.WriteString(loggerGen(3, "Search for Contact Unsuccessful. API Invoke Error from [entitySearch] [Contact]: "+fmt.Sprintf("%v", xmlmcErr)))
+			return intReturn, xmlmcErr
+		}
+		err = xml.Unmarshal([]byte(XMLCheckContact), &xmlRespon)
+		if err != nil {
+			buffer.WriteString(loggerGen(3, "Search for Contact Unsuccessful. Unmarshall Error from [entitySearch] [Contact]: "+fmt.Sprintf("%v", err)))
+		} else {
+			if xmlRespon.MethodResult != constOK {
+				err = errors.New(xmlRespon.State.ErrorRet)
+				buffer.WriteString(loggerGen(3, "Search for Contact Unsuccessful. MethodResult not OK from [entitySearch] [Contact]: "+fmt.Sprintf("%v", err)))
+			} else {
+				//-- Check Response
+				if xmlRespon.PKID != "" {
+					intReturn, err = strconv.Atoi(xmlRespon.PKID)
+					if err != nil {
+						buffer.WriteString(loggerGen(3, "Search for Contact Unsuccessful. Key Type Conversion Failed [entitySearch] [Contact]: "+fmt.Sprintf("%v", err)))
+						intReturn = -1
+					}
+				}
+			}
+		}
+
 	}
+
 	return intReturn, err
 }
 
