@@ -6,6 +6,7 @@
     "CustomerPortalOrgView": true,
     "CustomerPortalOrgViewRevoke": false,
     "UpdateContactStatus": false,
+    "SubscribeToServiceID": 0,
     "SQLConf": {
         "Driver": "csv",
         "Server": "localhost",

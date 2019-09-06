@@ -96,6 +96,7 @@ type SQLImportConfStruct struct {
 	CustomerPortalOrgView       bool
 	CustomerPortalOrgViewRevoke bool
 	UpdateContactStatus         bool
+	SubscribeToServiceID        int
 	SQLConf                     sqlConfStruct
 	ContactMapping              map[string]string
 	SQLAttributes               []string

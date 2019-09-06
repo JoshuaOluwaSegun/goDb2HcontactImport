@@ -309,6 +309,31 @@ func upsertContact(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, f
 			}
 			buffer.WriteString(loggerGen(1, "Contact to Portal Attach Success"))
 		}
+		//Service Subscription
+		if SQLImportConf.SubscribeToServiceID > 0 {
+			var xmlSubScribeResp xmlmcResponse
+			espXmlmc.ClearParam()
+			espXmlmc.SetParam("serviceId", strconv.Itoa(SQLImportConf.SubscribeToServiceID))
+			espXmlmc.SetParam("subscriberId", strconv.Itoa(foundID))
+			espXmlmc.SetParam("subscriberType", "Contact")
+			XMLCreate, xmlmcErr = espXmlmc.Invoke("apps/com.hornbill.servicemanager/ServiceSubscriptions", "add")
+			if xmlmcErr != nil {
+				buffer.WriteString(loggerGen(3, "Subscribing Contact Unsuccessful. API Invoke Error from [ServiceSubscriptions_add]: "+fmt.Sprintf("%v", xmlmcErr)))
+				errorCountInc()
+				return
+			}
+			err := xml.Unmarshal([]byte(XMLCreate), &xmlSubScribeResp)
+			if err != nil {
+				buffer.WriteString(loggerGen(3, "Subscribing Contact Unsuccessful. Unmarshall Error from [ServiceSubscriptions_add]: "+fmt.Sprintf("%v", err)))
+				return
+			}
+			if xmlSubScribeResp.MethodResult != constOK {
+				err = errors.New(xmlSubScribeResp.State.ErrorRet)
+				buffer.WriteString(loggerGen(3, "Subscribing Contact  Unsuccessful. MethodResult not OK from [ServiceSubscriptions_add]: "+fmt.Sprintf("%v", err)))
+				return
+			}
+			buffer.WriteString(loggerGen(1, "Subscribing Contact  Success"))
+		}
 		//######
 		if SQLImportConf.CustomerPortalOrgView {
 			var xmlPortalOrgViewResp xmlmcResponse

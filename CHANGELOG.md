@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.5.0 (September 6th, 2019)
+
+Features:
+
+- Allow for individual contact subscription to a Service. Requires the numeric Service ID to be obtained (eg from the URL (123 in ...hornbill.com/INSTANCENAME/servicemanager/service/view/123/) )
+
 ## 1.4.0 (July 30th, 2019)
 
 Features:
