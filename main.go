@@ -371,11 +371,14 @@ func checkContactOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct, 
 	var err error
 	espXmlmc.SetParam("entity", "Contact")
 
-	if configMatchLike {
+//	if configMatchLike {
 		espXmlmc.SetParam("matchScope", "all")
 		espXmlmc.OpenElement("searchFilter")
 		espXmlmc.SetParam("column", SQLImportConf.SQLConf.FieldID)
 		espXmlmc.SetParam("value", contactID)
+		if !configMatchLike {
+			espXmlmc.SetParam("matchType", "exact")
+		}
 		espXmlmc.CloseElement("searchFilter")
 		espXmlmc.SetParam("maxResults", "1")
 
@@ -404,7 +407,7 @@ func checkContactOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct, 
 			}
 		}
 
-	} else {
+/*	} else {
 		espXmlmc.SetParam("searchQuery", SQLImportConf.SQLConf.FieldID+":"+contactID)
 		espXmlmc.SetParam("resultsFrom", "0")
 		espXmlmc.SetParam("resultsTo", "0")
@@ -435,7 +438,7 @@ func checkContactOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct, 
 		}
 
 	}
-
+*/
 	return intReturn, err
 }
 

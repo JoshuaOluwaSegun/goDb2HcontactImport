@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.5.1 (October 3rd, 2019)
+
+Fixes:
+
+- reworking of 1.4.0 solution to future-proof it
+
 ## 1.5.0 (September 6th, 2019)
 
 Features:
