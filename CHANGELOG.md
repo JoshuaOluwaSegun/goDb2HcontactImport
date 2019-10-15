@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 1.6.0 (October 15th, 2019)
+
+Features:
+
+- Added option for CLI output to be in the terminal-default colours only
+- Added additional log output when Create is selected in config, and Contact already exists in Hornbill
+- Removed hard-coded list of mapped columns, so now any Contact column can be populated entirely by config
+
 ## 1.5.1 (October 3rd, 2019)
 
 Fixes:

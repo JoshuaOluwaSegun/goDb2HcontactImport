@@ -119,14 +119,14 @@ func logger(t int, s string, outputtoCLI bool) {
 		errorLogPrefix = "[ERROR] "
 	}
 	if outputtoCLI {
-		if t == 3 {
+		if !configNoColour && t == 3 {
 			orange(errorLogPrefix + s + "\n")
-		} else if t == 4 {
+		} else if !configNoColour && t == 4 {
 			red(errorLogPrefix + s + "\n")
 		} else {
-			fmt.Printf(errorLogPrefix + s + "\n")
-		}
+			fmt.Println(errorLogPrefix + s)
 
+		}
 	}
 	log.Println(errorLogPrefix + s)
 }

@@ -18,6 +18,7 @@ func procFlags() {
 	flag.BoolVar(&configMatchLike, "matchlike", false, "Allow the Import to Search Contact by LIKE")
 	flag.BoolVar(&configDryRun, "dryrun", false, "Allow the Import to run without Creating or Updating Contacts")
 	flag.BoolVar(&configVersion, "version", false, "Output Version")
+	flag.BoolVar(&configNoColour, "nocol", false, "Set to true to remove colour from CLI output")
 	flag.StringVar(&configMaxRoutines, "concurrent", "1", "Maximum number of requests to import concurrently.")
 
 	//-- Parse Flags

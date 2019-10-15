@@ -8,7 +8,7 @@ import (
 
 //----- Constants -----
 const (
-	version = "1.5.1"
+	version = "1.6.0"
 	constOK = "ok"
 )
 
@@ -23,6 +23,7 @@ var (
 	configVersion      bool
 	configMatchLike    bool
 	configMaxRoutines  string
+	configNoColour     bool
 	timeNow            string
 	startTime          time.Time
 	endTime            time.Duration
@@ -33,30 +34,6 @@ var (
 	logFileMutex       = &sync.Mutex{}
 	worker             sync.WaitGroup
 	maxGoroutines      = 6
-
-	ContactArray = []string{
-		"logon_id",
-		"firstname",
-		"lastname",
-		"company",
-		"email_1",
-		"email_2",
-		"tel_1",
-		"tel_2",
-		"jobtitle",
-		"description",
-		"notes",
-		"country",
-		"language",
-		"private",
-		"rights",
-		"contact_status",
-		"custom_1",
-		"custom_2",
-		"custom_3",
-		"custom_4",
-		"custom_5",
-		"custom_6"}
 )
 
 //----- Structs -----
@@ -79,7 +56,6 @@ type paramsOrganisationRowDataListStruct struct {
 type organisationObjectStruct struct {
 	OrganizationID   int    `xml:"h_organization_id"`
 	OrganizationName string `xml:"h_organization_name"`
-	/* OrganisationCountry string `xml:"h_country"` */
 }
 
 type counterTypeStruct struct {
