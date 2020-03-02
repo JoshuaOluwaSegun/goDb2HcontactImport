@@ -257,26 +257,18 @@ func upsertContact(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, f
 			//### Addition for contact = organisation
 			var xmlCompRelationResp xmlmcResponse
 			espXmlmc.ClearParam()
-			espXmlmc.SetParam("entity", "OrganizationContacts")
-			espXmlmc.SetParam("returnModifiedData", "false")
-			espXmlmc.SetParam("formatValues", "false")
-			espXmlmc.SetParam("returnRawValues", "false")
-			espXmlmc.OpenElement("primaryEntityData")
-			espXmlmc.OpenElement("record")
-			espXmlmc.SetParam("h_organization_id", searchResultOrganisationID)
-			espXmlmc.SetParam("h_contact_id", strconv.Itoa(foundID))
-			espXmlmc.CloseElement("record")
-			espXmlmc.CloseElement("primaryEntityData")
-			XMLCreate, xmlmcErr = espXmlmc.Invoke("data", "entityAddRecord")
+			espXmlmc.SetParam("contactId", strconv.Itoa(foundID))
+			espXmlmc.SetParam("orgId", searchResultOrganisationID)
+			XMLCreate, xmlmcErr = espXmlmc.Invoke("apps/com.hornbill.core/Contact", "changeOrg")
 			if xmlmcErr != nil {
 				errorCountInc()
-				buffer.WriteString(loggerGen(3, "Adding Contact to Organisation Unsuccessful. API Invoke Error from [entityAddRecord] for entity [OrganizationContacts]: "+fmt.Sprintf("%v", xmlmcErr)))
+				buffer.WriteString(loggerGen(3, "Attaching Contact to Organisation Unsuccessful. API Invoke Error from [changeOrg]: "+fmt.Sprintf("%v", xmlmcErr)))
 				return
 			}
 			err = xml.Unmarshal([]byte(XMLCreate), &xmlCompRelationResp)
 			if err != nil {
 				errorCountInc()
-				buffer.WriteString(loggerGen(3, "Adding Contact to Organisation Unsuccessful. Unmarshall Error from [entityAddRecord] for entity [OrganizationContacts]: "+fmt.Sprintf("%v", err)))
+				buffer.WriteString(loggerGen(3, "Attaching Contact to Organisation Unsuccessful. Unmarshall Error from [changeOrg]: "+fmt.Sprintf("%v", err)))
 				return
 			}
 			buffer.WriteString(loggerGen(1, "Adding Contact to Organization Success"))

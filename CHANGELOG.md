@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.6.1 (March 2nd, 2020)
+
+Fixes:
+
+- Updating Contact Organization link instead of inserting.
+
 ## 1.6.0 (October 15th, 2019)
 
 Features:
