@@ -150,6 +150,7 @@ func upsertContact(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, f
 	for key, value := range u {
 		p[key] = fmt.Sprintf("%s", value)
 	}
+	espXmlmc.SetParam("application", "com.hornbill.core")
 	espXmlmc.SetParam("entity", "Contact")
 	espXmlmc.SetParam("returnModifiedData", "true")
 	espXmlmc.SetParam("returnRawValues", "true")
@@ -231,6 +232,7 @@ func upsertContact(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, f
 		if searchResultOrganisationID != "" && foundID > 0 {
 			var xmlRelationResp xmlmcResponse
 			espXmlmc.ClearParam()
+			espXmlmc.SetParam("application", "com.hornbill.core")
 			espXmlmc.SetParam("entity", "RelatedContainer")
 			espXmlmc.OpenElement("primaryEntityData")
 			espXmlmc.OpenElement("record")
@@ -360,6 +362,7 @@ func upsertContact(u map[string]interface{}, espXmlmc *apiLib.XmlmcInstStruct, f
 func checkContactOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct, buffer *bytes.Buffer) (int, error) {
 	intReturn := -1
 	var err error
+	espXmlmc.SetParam("application", "com.hornbill.core")
 	espXmlmc.SetParam("entity", "Contact")
 
 	//	if configMatchLike {
@@ -461,6 +464,7 @@ func searchOrg(orgName string, buffer *bytes.Buffer) (bool, int, string) {
 	if orgName == "" {
 		return boolReturn, intReturn, ""
 	}
+	espXmlmc.SetParam("application", "com.hornbill.core")
 	espXmlmc.SetParam("entity", "Organizations")
 	espXmlmc.SetParam("matchScope", "all")
 	espXmlmc.OpenElement("searchFilter")
@@ -488,6 +492,7 @@ func searchOrg(orgName string, buffer *bytes.Buffer) (bool, int, string) {
 
 					var xml2Resp xmlmcGroupListResponse
 					espXmlmc.ClearParam()
+					espXmlmc.SetParam("application", "com.hornbill.core")
 					espXmlmc.SetParam("entity", "Container")
 					espXmlmc.SetParam("matchScope", "all")
 					espXmlmc.OpenElement("searchFilter")
