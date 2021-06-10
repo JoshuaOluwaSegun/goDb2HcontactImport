@@ -16,6 +16,7 @@ func procFlags() {
 	flag.StringVar(&configFileName, "file", "conf.json", "Name of Configuration File To Load")
 	flag.StringVar(&configLogPrefix, "logprefix", "", "Add prefix to the logfile")
 	flag.BoolVar(&configMatchLike, "matchlike", false, "Allow the Import to Search Contact by LIKE")
+	flag.BoolVar(&configMatchOrgLike, "matchorglike", false, "Allow the Import to Search Organisation by LIKE")
 	flag.BoolVar(&configDryRun, "dryrun", false, "Allow the Import to run without Creating or Updating Contacts")
 	flag.BoolVar(&configVersion, "version", false, "Output Version")
 	flag.BoolVar(&configNoColour, "nocol", false, "Set to true to remove colour from CLI output")

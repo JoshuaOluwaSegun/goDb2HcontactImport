@@ -8,7 +8,7 @@ import (
 
 //----- Constants -----
 const (
-	version = "1.6.2"
+	version = "1.6.3"
 	constOK = "ok"
 )
 
@@ -22,6 +22,7 @@ var (
 	configDryRun       bool
 	configVersion      bool
 	configMatchLike    bool
+	configMatchOrgLike    bool
 	configMaxRoutines  string
 	configNoColour     bool
 	timeNow            string

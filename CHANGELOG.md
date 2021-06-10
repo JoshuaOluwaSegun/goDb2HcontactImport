@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.6.3 (June 10th, 2021)
+
+Features:
+
+- Since the introduction of entityBrowseRecords2, the search on organisation is done on a LIKE format instead of an exact match (case-insentive). Have now made exact match default behaviour, if you wish to revert to the behaviour from v1.0.3 until now, use the -matchorglike=true command line parameter.
+
 ## 1.6.2 (April 15th, 2020)
 
 Change:

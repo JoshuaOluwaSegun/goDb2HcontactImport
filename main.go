@@ -470,6 +470,9 @@ func searchOrg(orgName string, buffer *bytes.Buffer) (bool, int, string) {
 	espXmlmc.OpenElement("searchFilter")
 	espXmlmc.SetParam("column", "h_organization_name")
 	espXmlmc.SetParam("value", orgName)
+	if !configMatchOrgLike {
+		espXmlmc.SetParam("matchType", "exact")
+	}
 	espXmlmc.CloseElement("searchFilter")
 	espXmlmc.SetParam("maxResults", "1")
 	XMLOrgSearch, xmlmcErr := espXmlmc.Invoke("data", "entityBrowseRecords2")
