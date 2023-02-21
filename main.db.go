@@ -11,11 +11,10 @@ import (
 	_ "github.com/alexbrainman/odbc"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/hornbill/go-mssqldb"
-	_ "github.com/hornbill/mysql320" //MySQL v3.2.0 to v5 driver - Provides SWSQL (MySQL 4.0.16) support
 )
 
-//queryDatabase -- Query Database for contacts
-//-- Builds map of contacts, returns true if successful
+// queryDatabase -- Query Database for contacts
+// -- Builds map of contacts, returns true if successful
 func queryDatabase() (bool, []map[string]interface{}) {
 	//Clear existing contact Map down
 	ArrContactMaps := make([]map[string]interface{}, 0)
@@ -67,7 +66,7 @@ func queryDatabase() (bool, []map[string]interface{}) {
 	return true, ArrContactMaps
 }
 
-//buildConnectionString -- Build the connection string for the SQL driver
+// buildConnectionString -- Build the connection string for the SQL driver
 func buildConnectionString() string {
 	if SQLImportConf.SQLConf.Server == "" || SQLImportConf.SQLConf.Database == "" || SQLImportConf.SQLConf.UserName == "" {
 		//Conf not set - log error and return empty string
@@ -99,15 +98,6 @@ func buildConnectionString() string {
 			connectString = connectString + "3306"
 		}
 		connectString = connectString + ")/" + SQLImportConf.SQLConf.Database
-	case "mysql320":
-		var dbPortSetting string
-		if SQLImportConf.SQLConf.Port != 0 {
-			dbPortSetting = strconv.Itoa(SQLImportConf.SQLConf.Port)
-		} else {
-			dbPortSetting = "3306"
-		}
-		connectString = "tcp:" + SQLImportConf.SQLConf.Server + ":" + dbPortSetting
-		connectString = connectString + "*" + SQLImportConf.SQLConf.Database + "/" + SQLImportConf.SQLConf.UserName + "/" + SQLImportConf.SQLConf.Password
 	case "csv":
 		connectString = "Driver={Microsoft Text Driver (*.txt; *.csv)};DefaultDir=C:\\SPF\\Go\\work\\csvtest;Extensions=CSV;Extended Properties=\"text;HDR=Yes;FMT=Delimited\""
 		connectString = "DSN=" + SQLImportConf.SQLConf.Database + ";Extended Properties='text;HDR=Yes;FMT=Delimited'"

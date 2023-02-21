@@ -6,13 +6,13 @@ import (
 	"time"
 )
 
-//----- Constants -----
+// ----- Constants -----
 const (
-	version = "1.6.4"
+	version = "1.7.0"
 	constOK = "ok"
 )
 
-//----- Variables -----
+// ----- Variables -----
 var (
 	SQLImportConf      SQLImportConfStruct
 	organisations      []organisationListStruct
@@ -37,7 +37,7 @@ var (
 	maxGoroutines      = 6
 )
 
-//----- Structs -----
+// ----- Structs -----
 type organisationListStruct struct {
 	OrgName   string
 	OrgID     int
@@ -64,7 +64,7 @@ type counterTypeStruct struct {
 	created uint16
 }
 
-//SQLImportConfStruct - Struct that defines the import config schema
+// SQLImportConfStruct - Struct that defines the import config schema
 type SQLImportConfStruct struct {
 	APIKey                      string
 	InstanceID                  string

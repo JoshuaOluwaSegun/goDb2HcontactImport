@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.7.0 (Feburary, 21st, 2023)
+
+Change:
+
+- Removed deprecated mysql 3.2.0 driver.
+- Complied with latest Go binaries because of security advisory.
+
 ## 1.6.4 (July 6th, 2021)
 
 Change:

@@ -1,4 +1,4 @@
-//https://www.microsoft.com/en-us/download/details.aspx?id=13255
+// https://www.microsoft.com/en-us/download/details.aspx?id=13255
 package main
 
 //----- Packages -----
@@ -14,11 +14,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cheggaaa/pb"
 	apiLib "github.com/hornbill/goApiLib"
-	"github.com/hornbill/pb"
 )
 
-//----- Main Function -----
+// ----- Main Function -----
 func main() {
 
 	//-- Initiate Variables
@@ -51,11 +51,6 @@ func main() {
 	if !logged {
 		logger(4, "Unable to Connect to Instance", true)
 		return
-	}
-
-	//Set SWSQLDriver to mysql320
-	if SQLImportConf.SQLConf.Driver == "swsql" {
-		SQLImportConf.SQLConf.Driver = "mysql320"
 	}
 
 	boolSQLContacts, arrContacts := queryDatabase()
@@ -91,9 +86,9 @@ func outputEnd() {
 	logger(1, "---- XMLMC SQL Contact Import Complete ---- ", true)
 }
 
-//processContacts -- Processes contacts from contact map
-//--If contact already exists on the instance, update
-//--If contact doesn't exist, create
+// processContacts -- Processes contacts from contact map
+// --If contact already exists on the instance, update
+// --If contact doesn't exist, create
 func processContacts(arrContacts []map[string]interface{}) {
 	bar := pb.StartNew(len(arrContacts))
 	logger(1, "Processing Contacts...\n", false)
@@ -403,7 +398,7 @@ func checkContactOnInstance(contactID string, espXmlmc *apiLib.XmlmcInstStruct, 
 	return intReturn, err
 }
 
-//-- Function to search for organisation
+// -- Function to search for organisation
 func getOrgFromLookup(organisation string, buffer *bytes.Buffer) (string, string) {
 	organisationReturn := ""
 	compReturn := ""
@@ -435,7 +430,7 @@ func processComplexField(s string) string {
 	return html.UnescapeString(s)
 }
 
-//-- Function to Check if in Cache
+// -- Function to Check if in Cache
 func orgInCache(orgName string) (bool, int, string) {
 	boolReturn := false
 	intReturn := 0
@@ -454,7 +449,7 @@ func orgInCache(orgName string) (bool, int, string) {
 	return boolReturn, intReturn, stringCompReturn
 }
 
-//-- Function to Check if the organisation is on the instance
+// -- Function to Check if the organisation is on the instance
 func searchOrg(orgName string, buffer *bytes.Buffer) (bool, int, string) {
 	boolReturn := false
 	intReturn := 0

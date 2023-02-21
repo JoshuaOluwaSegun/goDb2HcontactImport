@@ -12,7 +12,7 @@ version=${versiond//./_}
 version=${version// /}
 versiond=${versiond// /}
 #platforms="darwin/386 darwin/amd64 freebsd/386 freebsd/amd64 freebsd/arm linux/386 linux/amd64 linux/arm windows/386 windows/amd64"
-platforms="windows/386 windows/amd64 darwin/amd64"
+platforms="windows/386 windows/amd64 darwin/arm64"
 printf " ---- Building Database Contact Import $versiond ---- \n"
 
 rm -rf "release/"
@@ -41,7 +41,7 @@ do
     destination="builds/$goos/$goarch/$output"
 
     printf "Go Build\n"
-    GOOS=$goos GOARCH=$goarch go build  -o $destination $target
+    CGO_ENABLED=1 GOOS=$goos GOARCH=$goarch go build  -o $destination $target
 
     printf "Copy Source Files\n"
     #Copy Source to Build Dir
